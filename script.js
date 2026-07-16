@@ -1,10 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Touch Tetris</title>
+
+<style>
+
+body {
+    margin:0;
+    background:#111;
+    color:white;
+    text-align:center;
+    font-family:Arial;
+}
+
+canvas {
+    background:black;
+    border:3px solid white;
+    width:min(90vw,360px);
+    height:auto;
+    touch-action:none;
+}
+
+button {
+    font-size:18px;
+    padding:10px 20px;
+    margin:5px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Tetris</h1>
+
+<canvas id="tetris" width="360" height="720"></canvas>
+
+<h2>Score: <span id="score">0</span></h2>
+
+<button id="pause">⏸ Pause</button>
+<button id="restart">Restart</button>
+
+
+<script>
+
+
 const canvas = document.getElementById("tetris");
 const ctx = canvas.getContext("2d");
 
 ctx.scale(30,30);
 
 
-const arena = createMatrix(10,20);
+// Bigger playing field
+const arena = createMatrix(12,24);
+
 
 
 const colors = [
@@ -15,11 +66,19 @@ const colors = [
     "green",
     "red",
     "blue",
-    "orange"
+    "orange",
+    "pink",
+    "white",
+    "lime",
+    "brown",
+    "gray"
 ];
 
 
-const pieces = "TJLOSZI";
+
+// More pieces
+const pieces = "TJLOSZIQUNVWX";
+
 
 
 let score = 0;
@@ -27,17 +86,22 @@ let paused = false;
 
 
 
-// Hintergrundmusik
 const music = new Audio("music/orchestra.mp3");
 
-music.loop = true;
-music.volume = 0.3;
+music.loop=true;
+music.volume=0.3;
 
 
 
 const player = {
-    pos:{x:0,y:0},
+
+    pos:{
+        x:0,
+        y:0
+    },
+
     matrix:null
+
 };
 
 
@@ -50,7 +114,9 @@ function createMatrix(w,h){
 
     while(h--){
 
-        matrix.push(new Array(w).fill(0));
+        matrix.push(
+            new Array(w).fill(0)
+        );
 
     }
 
@@ -62,61 +128,141 @@ function createMatrix(w,h){
 
 
 
+
 function createPiece(type){
 
-    if(type==="T")
-    return [
-        [0,1,0],
-        [1,1,1],
-        [0,0,0]
-    ];
+
+if(type==="T")
+
+return [
+[0,1,0],
+[1,1,1],
+[0,0,0]
+];
 
 
-    if(type==="O")
-    return [
-        [2,2],
-        [2,2]
-    ];
+
+if(type==="O")
+
+return [
+[2,2],
+[2,2]
+];
 
 
-    if(type==="L")
-    return [
-        [0,0,3],
-        [3,3,3],
-        [0,0,0]
-    ];
+
+if(type==="L")
+
+return [
+[0,0,3],
+[3,3,3],
+[0,0,0]
+];
 
 
-    if(type==="J")
-    return [
-        [4,0,0],
-        [4,4,4],
-        [0,0,0]
-    ];
+
+if(type==="J")
+
+return [
+[4,0,0],
+[4,4,4],
+[0,0,0]
+];
 
 
-    if(type==="I")
-    return [
-        [5,5,5,5]
-    ];
+
+if(type==="I")
+
+return [
+[5,5,5,5]
+];
 
 
-    if(type==="S")
-    return [
-        [0,6,6],
-        [6,6,0],
-        [0,0,0]
-    ];
+
+if(type==="S")
+
+return [
+[0,6,6],
+[6,6,0],
+[0,0,0]
+];
 
 
-    if(type==="Z")
-    return [
-        [7,7,0],
-        [0,7,7],
-        [0,0,0]
-    ];
+
+if(type==="Z")
+
+return [
+[7,7,0],
+[0,7,7],
+[0,0,0]
+];
+
+
+
+// NEW SHAPES
+
+
+if(type==="Q")
+
+return [
+[8,8,8],
+[8,8,8],
+[8,8,8]
+];
+
+
+
+if(type==="U")
+
+return [
+[9,0,9],
+[9,9,9],
+[0,0,0]
+];
+
+
+
+if(type==="N")
+
+return [
+[10,10,0],
+[0,10,10],
+[0,0,0]
+];
+
+
+
+if(type==="V")
+
+return [
+[11,0,0],
+[11,0,0],
+[11,11,11]
+];
+
+
+
+if(type==="W")
+
+return [
+[12,0,0],
+[12,12,0],
+[0,12,12]
+];
+
+
+
+if(type==="X")
+
+return [
+[0,1,0],
+[1,1,1],
+[0,1,0]
+];
+
 
 }
+
 
 
 
@@ -124,25 +270,34 @@ function createPiece(type){
 
 function draw(){
 
-    ctx.fillStyle="black";
 
-    ctx.fillRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
+ctx.fillStyle="black";
 
-
-    drawMatrix(arena,{x:0,y:0});
+ctx.fillRect(
+0,
+0,
+canvas.width,
+canvas.height
+);
 
 
-    drawMatrix(
-        player.matrix,
-        player.pos
-    );
+
+drawMatrix(
+arena,
+{x:0,y:0}
+);
+
+
+
+drawMatrix(
+player.matrix,
+player.pos
+);
+
 
 }
+
+
 
 
 
@@ -150,28 +305,41 @@ function draw(){
 
 function drawMatrix(matrix,offset){
 
-    matrix.forEach((row,y)=>{
 
-        row.forEach((value,x)=>{
+matrix.forEach((row,y)=>{
 
-            if(value){
 
-                ctx.fillStyle=colors[value];
+row.forEach((value,x)=>{
 
-                ctx.fillRect(
-                    x+offset.x,
-                    y+offset.y,
-                    1,
-                    1
-                );
 
-            }
+if(value){
 
-        });
 
-    });
+ctx.fillStyle=colors[value];
+
+
+ctx.fillRect(
+
+x+offset.x,
+y+offset.y,
+1,
+1
+
+);
+
 
 }
+
+
+});
+
+
+});
+
+
+}
+
+
 
 
 
@@ -179,37 +347,43 @@ function drawMatrix(matrix,offset){
 
 function collide(){
 
-    const m=player.matrix;
-    const o=player.pos;
+
+const m=player.matrix;
+const o=player.pos;
 
 
-    for(let y=0;y<m.length;y++){
 
-        for(let x=0;x<m[y].length;x++){
-
-
-            if(m[y][x]){
+for(let y=0;y<m.length;y++){
 
 
-                if(
-                    !arena[y+o.y] ||
-                    arena[y+o.y][x+o.x] !== 0
-                ){
-
-                    return true;
-
-                }
-
-            }
-
-        }
-
-    }
+for(let x=0;x<m[y].length;x++){
 
 
-    return false;
+if(
+m[y][x] &&
+(
+!arena[y+o.y] ||
+arena[y+o.y][x+o.x]!==0
+)
+
+){
+
+return true;
 
 }
+
+
+}
+
+
+}
+
+
+return false;
+
+
+}
+
 
 
 
@@ -217,30 +391,36 @@ function collide(){
 
 function merge(){
 
-    player.matrix.forEach((row,y)=>{
 
-        row.forEach((value,x)=>{
-
-
-            if(value){
-
-                arena[
-                    y+player.pos.y
-                ]
-                [
-                    x+player.pos.x
-                ] = value;
-
-            }
+player.matrix.forEach((row,y)=>{
 
 
-        });
+row.forEach((value,x)=>{
 
 
-    });
+if(value){
+
+
+arena[
+y+player.pos.y
+]
+[
+x+player.pos.x
+]
+=value;
 
 
 }
+
+
+});
+
+
+});
+
+
+}
+
 
 
 
@@ -248,37 +428,50 @@ function merge(){
 
 function rotate(matrix){
 
-    for(let y=0;y<matrix.length;y++){
 
-        for(let x=0;x<y;x++){
-
-
-            [
-                matrix[x][y],
-                matrix[y][x]
-            ] =
-            [
-                matrix[y][x],
-                matrix[x][y]
-            ];
+for(
+let y=0;
+y<matrix.length;
+y++
+){
 
 
-        }
+for(
+let x=0;
+x<y;
+x++
+){
 
-    }
 
+[
+matrix[x][y],
+matrix[y][x]
+]=
+[
+matrix[y][x],
+matrix[x][y]
+];
 
-    matrix.reverse();
 
 }
 
 
+}
 
+
+matrix.reverse();
+
+
+}
+
+// ===============================
+// PLAYER ROTATION
+// ===============================
 
 
 function playerRotate(){
 
-    const old = player.matrix;
+    const oldMatrix = player.matrix;
 
 
     rotate(player.matrix);
@@ -286,7 +479,7 @@ function playerRotate(){
 
     if(collide()){
 
-        player.matrix = old;
+        player.matrix = oldMatrix;
 
     }
 
@@ -295,26 +488,29 @@ function playerRotate(){
 
 
 
+// ===============================
+// CLEAR LINES
+// ===============================
+
 
 function clearLines(){
 
-    let lines=0;
+    let lines = 0;
 
 
     outer:
 
-    for(let y=arena.length-1;y>=0;y--){
+    for(let y = arena.length - 1; y >= 0; y--){
 
 
-        for(let x=0;x<arena[y].length;x++){
+        for(let x = 0; x < arena[y].length; x++){
 
 
-            if(arena[y][x]===0){
+            if(arena[y][x] === 0){
 
                 continue outer;
 
             }
-
 
         }
 
@@ -324,7 +520,7 @@ function clearLines(){
 
 
         arena.unshift(
-            new Array(10).fill(0)
+            new Array(arena[0].length).fill(0)
         );
 
 
@@ -336,22 +532,23 @@ function clearLines(){
 
 
 
-
     if(lines){
 
-        score += lines*100;
+        score += lines * 100;
 
-
-        document.getElementById("score")
-        .innerText=score;
+        document.getElementById("score").innerText = score;
 
     }
-
 
 }
 
 
 
+
+
+// ===============================
+// RESET PLAYER
+// ===============================
 
 
 function playerReset(){
@@ -371,14 +568,15 @@ function playerReset(){
     player.pos.y=0;
 
 
-
     player.pos.x =
     Math.floor(
-        arena[0].length/2
+        arena[0].length /
+        2
     )
     -
     Math.floor(
-        player.matrix[0].length/2
+        player.matrix[0].length /
+        2
     );
 
 
@@ -387,7 +585,7 @@ function playerReset(){
 
 
         alert(
-            "Game Over! Punkte: " + score
+            "Game Over! Score: " + score
         );
 
 
@@ -414,6 +612,11 @@ function playerReset(){
 
 
 
+
+
+// ===============================
+// DROP PIECE
+// ===============================
 
 
 function playerDrop(){
@@ -447,12 +650,18 @@ function playerDrop(){
 
 
 
+
+
+// ===============================
+// KEYBOARD CONTROLS
+// ===============================
+
+
 document.addEventListener(
 "keydown",
 event=>{
 
 
-    // Musik starten
     if(music.paused){
 
         music.play();
@@ -473,7 +682,6 @@ event=>{
 
         }
 
-
     }
 
 
@@ -491,9 +699,7 @@ event=>{
 
         }
 
-
     }
-
 
 
 
@@ -503,8 +709,8 @@ event=>{
 
         playerDrop();
 
-
     }
+
 
 
 
@@ -513,7 +719,6 @@ event=>{
 
 
         playerRotate();
-
 
     }
 
@@ -529,24 +734,189 @@ event=>{
 
 
 
+// ===============================
+// TOUCH CONTROLS
+// ===============================
+
+
+let touchStartX=0;
+let touchStartY=0;
+
+
+
+canvas.addEventListener(
+"touchstart",
+event=>{
+
+
+    if(music.paused){
+
+        music.play();
+
+    }
+
+
+    let touch=event.touches[0];
+
+
+    touchStartX=touch.clientX;
+    touchStartY=touch.clientY;
+
+
+},
+{
+passive:false
+});
+
+
+
+
+
+canvas.addEventListener(
+"touchend",
+event=>{
+
+
+let touch=event.changedTouches[0];
+
+
+let endX=touch.clientX;
+let endY=touch.clientY;
+
+
+let x=endX-touchStartX;
+let y=endY-touchStartY;
+
+
+
+const distance=30;
+
+
+
+// Swipe left
+
+if(
+Math.abs(x)>Math.abs(y)
+&&
+x < -distance
+){
+
+
+player.pos.x--;
+
+
+if(collide()){
+
+player.pos.x++;
+
+}
+
+
+}
+
+
+
+// Swipe right
+
+else if(
+Math.abs(x)>Math.abs(y)
+&&
+x > distance
+){
+
+
+player.pos.x++;
+
+
+if(collide()){
+
+player.pos.x--;
+
+}
+
+
+}
+
+
+
+// Swipe down
+
+else if(
+y > distance
+){
+
+
+playerDrop();
+
+
+}
+
+
+
+// Tap rotate
+
+else{
+
+
+playerRotate();
+
+
+}
+
+
+
+draw();
+
+
+
+},
+{
+passive:false
+});
+
+
+
+
+
+canvas.addEventListener(
+"touchmove",
+event=>{
+
+event.preventDefault();
+
+},
+{
+passive:false
+});
+
+
+
+
+
+
+
+
+// ===============================
+// BUTTONS
+// ===============================
+
 
 document
 .getElementById("pause")
 .onclick=function(){
 
 
-    paused=!paused;
+paused=!paused;
 
 
 
-    this.innerText =
-    paused ?
-    "▶ Weiter" :
-    "⏸ Pause";
+this.innerText =
+paused ?
+"▶ Continue" :
+"⏸ Pause";
 
 
 };
-
 
 
 
@@ -558,26 +928,25 @@ document
 .onclick=function(){
 
 
-    arena.forEach(row=>{
+arena.forEach(row=>{
 
-        row.fill(0);
+row.fill(0);
 
-    });
-
-
-
-    score=0;
+});
 
 
 
-    document
-    .getElementById("score")
-    .innerText=0;
+score=0;
 
 
 
-    playerReset();
+document
+.getElementById("score")
+.innerText=0;
 
+
+
+playerReset();
 
 
 };
@@ -588,27 +957,35 @@ document
 
 
 
+
+// ===============================
+// START GAME
+// ===============================
+
+
 playerReset();
-
-
-
 
 
 setInterval(()=>{
 
 
-    if(!paused){
+if(!paused){
 
-        playerDrop();
+playerDrop();
 
-        draw();
+draw();
 
-    }
+}
 
 
 },700);
 
 
 
-
 draw();
+
+
+</script>
+
+</body>
+</html>
